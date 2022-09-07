@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+
+    <style>
+        body{
+            background-color: lightgray;
+        }
+        .btn{
+            padding: 20px 0;
+            background-color: white;
+        }
+        #timer{
+            margin: 70px 0;
+            font-size: 100px;
+            color: white;
+        }
+        .btn-small{
+            padding: 15px 0;
+        }
+        #timer-body{
+            width: 70%;
+            background-color: grey;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <div id="root">
+
+    </div>
+
+    <script type="text/babel">
+        class Promodoro extends React.Component {
+            constructor(props){
+                super(props);
+                this.state = { 
+                    timer: { Running: false,Stopped: false,Ended: false },
+                    currentTimer: {type: "pomodoro",timeout: false,timerState: 1500,timeLeft: 1500,timeLeftDisplay: 1500,message: "Time to Work!"}
+                }
+                this.timers = { pomodoro: 
+                    {
+                        type: "pomodoro",
+                        timeout: false,
+                        timerState: 1500,
+                        timeLeft: 1500,
+                        timeLeftDisplay: 1500,
+                        message: "Time to Work!"
+                    }, 
+                    shortBreak: {
+                        type: "shortBreak",
+                        timeout: false,
+                        timerState: 300,
+                        timeLeft: 300,
+                        timeLeftDisplay: 300,
+                        message: "Time for Break!"
+                    } 
+                }
+
+                this.startTimer = this.startTimer.bind(this);
+                this.endTimer = this.endTimer.bind(this);
+                this.stopTimer = this.stopTimer.bind(this);
+                this.navigateToTimer = this.navigateToTimer.bind(this);
+            }
+             // define startTimer() function to start timer and update currentTimer state
+            startTimer(event){
+                this.setState({
+                    timer: {
+                        Running: true,
+                        Stopped: false,
+                        Ended: false,
+                    }
+                })
+                if(this.state.timer.Stopped === false){
+                    var timer = setInterval(() => {
+                        console.log(this.state.timer.Running);
+                        if(this.state.timer.Running){
+                            console.log(this.state.currentTimer.timerState)
+                            if(this.state.currentTimer.timerState != 0){
+                                this.setState({
+                                    currentTimer: {
+                                        timerState: this.state.currentTimer.timerState === 0 ? 0 : this.state.currentTimer.timerState - 1,
+                                        message: this.state.currentTimer.message,
+                                        timeLeft: this.state.currentTimer.timeLeft
+                                    }
+                                })
+                            }else{
+                                clearInterval(timer);
+                                this.setState({
+                                    timer:{
+                                        Running: false,
+                                        Stopped: false,
+                                        Ended: true
+                                    },
+                                    currentTimer:{
+                                        type: this.timers.shortBreak.type,
+                                        timeout: this.timers.shortBreak.timeout,
+                                        timerState: this.timers.shortBreak.timerState,
+                                        timeLeft: this.timers.shortBreak.timeLeft,
+                                        timeLeftDisplay: this.timers.shortBreak.timeLeftDisplay,
+                                        message: this.timers.shortBreak.message
+                                    }
+                                })
+                                console.log(this.state.timer.Running);
+                                console.log(this.state.currentTimer.timerState);
+                            }
+                        }
+                    },1000);
+                }else{
+                    clearInterval(timer);
+                }
+            }
+
+            // define endTimer() function to end current timer and navigate to next timer
+            endTimer(event){
+                event.preventDefault();
+                this.setState({
+                    timer: {
+                        Running: false,
+                        Ended: true
+                    }
+                })
+                this.state.currentTimer.timerState = this.state.currentTimer.timeLeft;
+
+            }
+            // define navigateToTimer() function to update currentTimer state with given timer
+            navigateToTimer(event){
+                event.preventDefault();
+                const target = event.target.id;
+                if(this.timers.pomodoro.type === target){
+                    this.setState({
+                        timer:{
+                            Running: false
+                        },
+                        currentTimer:{
+                            type: this.timers.pomodoro.type,
+                            timeout: this.timers.pomodoro.timeout,
+                            timerState: this.timers.pomodoro.timerState,
+                            timeLeft: this.timers.pomodoro.timeLeft,
+                            timeLeftDisplay: this.timers.pomodoro.timeLeftDisplay,
+                            message: this.timers.pomodoro.message
+                        }
+                    })
+                }else{
+                    this.setState({
+                        timer:{
+                            Running: false
+                        },
+                        currentTimer:{
+                            type: this.timers.shortBreak.type,
+                            timeout: this.timers.shortBreak.timeout,
+                            timerState: this.timers.shortBreak.timerState,
+                            timeLeft: this.timers.shortBreak.timeLeft,
+                            timeLeftDisplay: this.timers.shortBreak.timeLeftDisplay,
+                            message: this.timers.shortBreak.message
+                        }
+                    })
+                }
+            }
+
+            // define stopTimer() function to pause the current timer and update the currentTimer state
+            stopTimer(event){
+                event.preventDefault();
+                this.setState(prevState => ({
+                    timer: {
+                        Running: false,
+                        Stopped: true,
+                        Ended: false
+                    },
+                    currentTimer: {
+                        timerState: prevState.currentTimer.timerState,
+                        message: prevState.currentTimer.message,
+                        timeLeft: prevState.currentTimer.timeLeft
+                    }
+                }));
+
+                console.log(this.state.currentTimer.timerState);
+            }
+
+            dispatchAsMin(second){
+                const mins = Math.floor(second/60);
+                const sec = second % 60;
+                const minutes = mins < 10 ? `0${mins}` : mins.toString();
+                return minutes + " : " + (sec < 10 ? `0${sec}` : sec.toString() ) 
+            }
+
+            render(){
+                return (
+                    <div className="container">
+                        <div className="text-center my-4">
+                            <h1 className="mb-5">Pomodoro</h1>
+                            <div className="container py-1" id="timer-body">
+                            
+                                    <div className="row">
+                                        <div className="d-grid gap-2 col-6">
+                                            <button onClick={this.navigateToTimer} id="pomodoro" className="btn btn-light">Pomodoro</button>
+
+                                        </div>
+                                        <div className="d-grid gap-2 col-6">
+                                            <button onClick={this.navigateToTimer} id="shortBreak" className="btn btn-light">Short Break</button>
+                                        </div>
+                                    </div>
+
+                                    <div className="row text-center">
+                                        <h1 id="timer">{this.dispatchAsMin(this.state.currentTimer.timerState)}</h1>
+                                    </div>
+
+                                    <div className="row text-center pb-5 mb-5" id="startBtn">
+                                        {this.state.timer.Running == false || this.state.timer.Ended == true ?
+                                            <div className="col-3 d-grid mx-auto">
+                                                <button className="btn btn-small btn-light" onClick={this.startTimer}>START</button>
+                                            </div>
+                                        : 
+                                        <div className="row">
+                                            <div className="col-3">
+                                            </div>
+                                            <div className="col-3 d-grid">
+                                                {this.state.timer.Running ? <button className="btn btn-small btn-light" onClick={this.stopTimer}>STOP</button> : null }
+                                            </div>
+                                            <div className="col-3 d-grid">
+                                                {this.state.timer.Running ? <button className="btn btn-small btn-light" onClick={this.endTimer}>END</button> : null }
+                                            </div>
+                                            <div className="col-3">   
+                                            </div>
+                                        </div>
+                                    }
+                                    </div>
+                                    
+                            </div>
+                            <div className="pt-5">
+                                <h3>{this.state.currentTimer.message}</h3>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        }
+        
+        ReactDOM.render(
+            <Promodoro />,
+            document.getElementById('root')
+        )
+    </script>
+</body>
+</html>
